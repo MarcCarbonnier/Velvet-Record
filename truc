@@ -1,0 +1,62 @@
+<?php
+include 'log.php';
+// Connexion à la base de données
+try {
+    $db = new PDO("mysql:host=$hostname;charset=utf8mb4;dbname=$dbname");
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (Exception $e) {
+    die('Erreur : ' . $e->getMessage());
+}
+
+// Préparation et exécution de la requête pour récupérer tous les enregistrements
+$requete = $db->prepare("SELECT * FROM disc");
+$requete->execute();
+
+// Récupération des enregistrements sous forme d'un tableau d'objets
+$discs = $requete->fetchAll(PDO::FETCH_OBJ);
+?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Accueil - Liste des Disques</title>
+</head>
+<body>
+
+    <h1>Liste des Disques</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nom du Disque</th>
+                <th>Année</th>
+                <th>Artiste</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php if (!empty($discs)): ?>
+                <?php foreach ($discs as $disc): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($disc->disc_id) ?></td>
+                        <td><?= htmlspecialchars($disc->disc_name) ?></td>
+                        <td><?= htmlspecialchars($disc->disc_year) ?></td>
+                        <td><?= htmlspecialchars($disc->disc_artist) ?></td>
+                        <td>
+                            <a href="view_disc.php?disc_id=<?= htmlspecialchars($disc->disc_id) ?>">Voir</a> |
+                            <a href="edit_disc.php?disc_id=<?= htmlspecialchars($disc->disc_id) ?>">Modifier</a> |
+                            <a href="delete_disc.php?disc_id=<?= htmlspecialchars($disc->disc_id) ?>" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce disque ?');">Supprimer</a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <tr>
+                    <td colspan="5">Aucun disque trouvé.</td>
+                </tr>
+            <?php endif; ?>
+        </tbody>
+    </table>
+
+</body>
+</html>
